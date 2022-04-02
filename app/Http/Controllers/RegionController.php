@@ -100,65 +100,31 @@ class RegionController extends Controller
         // if Send User in Headers
         $countObj = array();
         $countObj48 = array();
-        if (isset(auth()->user()->id)) {
-            $userLastSeen = $this->GetLastUserLastSeen();
-//            return date('Y-m-d H:i:s');
-//            return $userLastSeen;
-//            return count($userLastSeen);
 
-            $regions = $this->GetRegionsBasedOnCountry();
+        // if (isset(auth()->user()->id)) {
+        //     $userLastSeen = $this->GetLastUserLastSeen();
+        //     $regions = $this->GetRegionsBasedOnCountry();
 
-//            echo count($regions) ."  ". count($userLastSeen);
-            foreach ($regions as $k => $region) {
-//                echo "first loop : ". $region->id ." \r\n";
-                if (count($userLastSeen) > 0):
-//                    echo "first if " . $region->id . "\r\n";
-                    foreach ($userLastSeen as $K2 => $lastSeen) {
+        //     foreach ($regions as $k => $region) {
+        //         if (count($userLastSeen) > 0):
+        //             foreach ($userLastSeen as $K2 => $lastSeen) {
+        //                 if ($lastSeen->region_id == $region->id) :
+        //                     $countData = $this->GetEventsCountIfLastSeenFound($lastSeen->created_at->format('Y-m-d H:i:s'), $lastSeen->region_id);
+        //                     $countObj[] = array(
+        //                         'region_id' => $lastSeen->region_id,
+        //                         'event_count' => $countData->event_count
+        //                     );
+        //                 endif;
+        //             }
+        //         endif;
+        //         $countData = $this->GetEventsCountBetweenTodayAnd48HoursAgo($region->id);
+        //         $countObj48[] = array(
+        //             'region_id' => $region->id,
+        //             'event_count' => $countData->event_count
+        //         );
 
-                        if ($lastSeen->region_id == $region->id) :
-
-//                            echo $k . " : " . $K2 . "\r\n";
-//                            echo "first loop :" . $region->id . " : " . "second loop :" . $lastSeen->region_id . "\r\n";
-//                            echo "second if  : " . $lastSeen->region_id . " \r\n";
-                            // var [] Hekho Hekho Hekho :))
-//                echo "first if   \r\n";
-                             $countData = $this->GetEventsCountIfLastSeenFound($lastSeen->created_at->format('Y-m-d H:i:s'), $lastSeen->region_id);
-                            $countObj[] = array(
-                                'region_id' => $lastSeen->region_id,
-                                'event_count' => $countData->event_count
-                            );
-//                        return $countObj;
-//                            break;
-//                        else:
-//                            echo $k . " : " . $K2 . "\r\n";
-//                            echo "first loop :" . $region->id . " : " . "second loop :" . $lastSeen->region_id . "\r\n";
-//                            echo "second else  :" . $region->id . "  \r\n";
-////                            echo "else inside loop\r\n";
-//                            // get event from now to -48 hours
-//                            $countData = $this->GetEventsCountBetweenTodayAnd48HoursAgo($region->id);
-//                            $countObj[] = array(
-//                                'region_id' => $region->id,
-//                                'event_count' => $countData->event_count
-//                            );
-//                            break;
-                        endif;
-                    }
-                endif;
-//                elseif(count($userLastSeen) == 0 &&count($regions) > count($userLastSeen) ):
-//                    echo "first else\r\n";
-                // get event from now to -48 hours
-
-                 $countData = $this->GetEventsCountBetweenTodayAnd48HoursAgo($region->id);
-                $countObj48[] = array(
-                    'region_id' => $region->id,
-                    'event_count' => $countData->event_count
-                );
-
-            }
-//            return 'end of loop';
-//            return date('Y-m-d H:i:s');
-//            return $countObj;
-        }
+        //     }
+        // }
 
         $id_arr = array();
         $final_arr = array();
