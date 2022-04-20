@@ -82,7 +82,8 @@ class AdsNotificationsController extends Controller
             $this->TopicNotification((string)"region_id_" . $region_id, $text, (string)$badge);
 
         } else {
-            $this->TopicNotification('afr7na', $text);
+            $badge = $this->CountNotificationsByRegions(0);
+            $this->TopicNotification((string)'region_id_0', $text , $badge);
         }
 
 

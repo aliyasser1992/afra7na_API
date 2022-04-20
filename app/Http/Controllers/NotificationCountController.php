@@ -14,9 +14,9 @@ class NotificationCountController extends Controller
         if (isset(auth()->user()->id)) {
             $userData = $user->where('id', auth()->user()->id)->first();
             $last_seen_notification = $userData->notification != '' ? $userData->notification : '';
-            $count_notification = adsNotifications::where('country_id', request('country_id'));
-            if (request()->has('region_id')) {
-                $count_notification = $count_notification->where('region_id', request('region_id'));
+            $count_notification = adsNotifications::where('country_id', auth()->user()->country_id);
+            if (auth()->user()->region_id) {
+                $count_notification = $count_notification->where('region_id', auth()->user()->region_id);
             }
             if ($last_seen_notification != '') :
                 $count_notification = $count_notification->where('created_at', '>', $last_seen_notification);

@@ -7,6 +7,8 @@ use Image;
 
 class media extends Model
 {
+
+    protected $table = "meida";
     protected $fillable = [
         'event_id',
         'ads_id',

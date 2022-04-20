@@ -169,9 +169,9 @@ class EventController extends Controller
 //        return $countObj;
         $output = event
             ::filter($filters)
-            ->with(['user', 'country', 'region'])
-            ->orderBy('special', 'Desc')
-            ->orderBy('id', 'Desc')
+            ->with(['user', 'country', 'region','media'])
+           // ->orderBy('special', 'Desc')
+            ->orderBy('created_at', 'desc')
             ->paginate(10000);
         $output[] = $countObj;
 
@@ -224,7 +224,7 @@ class EventController extends Controller
         //insert normal image
         $image = $input['special_image'];
         $image_name = 'media-' . rand(10, 100) . date('mdYhis') . '.' . pathinfo($image->getClientOriginalName(), PATHINFO_EXTENSION);
-        $image_path = 'event/';
+        $image_path = public_path().'/storage/image/event/';
 
 
         $image = Image::make($image);
@@ -238,25 +238,26 @@ class EventController extends Controller
             $constraint->upsize();
             $constraint->aspectRatio();
         });
-//        Storage::disk('public')->put($image_path . $image_name, $image);
-//        Storage::disk('public')->putFileAs($image_path, $image, $image_name);
-        $image->save($image_path . $image_name);
+      //    Storage::disk('public')->put($image_path . $image_name, $image);
+     //     Storage::disk('public')->putFileAs($image_path, $image, $image_name);
+                     
+          $image->save($image_path . $image_name);
 
-        $input['special_image'] = '/event/' . $image_name;
-
+        $input['special_image'] = '/storage/image/event/' . $image_name;
+        $event['created_at'] ='null';
         $event = event::create($input);
         //insert media
 //        print_r($input['media']);
 //        return;
         $event->delete();
-
+            
         if (isset($input['media'])) {
             for ($i = 0; $i < count($input['media']); $i++) {
                 $media = $input['media'][$i];
                 $media_name = 'media-' . ($i + 30 * 35) . '-' . rand(100, 1000) . '-' . ($i * 30 + 95) . '.' . $media->getClientOriginalName();
                 $thump_name = 'thump-' . ($i + 30 * 35) . '-' . rand(100, 1000) . '-' . ($i * 30 + 95) . '.' . $media->getClientOriginalName();
-                $thump_path = 'thump/';
-                $media_path = 'event/';
+                $thump_path = public_path().'/storage/image/thump/';
+                $media_path = public_path().'/storage/image/event/';
 
                 $height = Image::make($media)->height();
                 $newWidth = ($height * 8) / 5;
@@ -285,21 +286,21 @@ class EventController extends Controller
                     $constraint->upsize();
                     $constraint->aspectRatio();
                 });
-//                Storage::disk('public')->put($media_path . $media_name, $photo);
+            //     Storage::disk('public')->put($media_path . $media_name, $photo);
                 $thump->save($thump_path . $thump_name);
                 $photo->save($media_path . $media_name);
-//                Storage::disk('public')->putFileAs($media_path, $media, $media_name);
+          //      Storage::disk('public')->putFileAs($media_path, $media, $media_name);
 
-                $input['image'] = '/event/' . $media_name;
-                $input['thump'] = '/thump/' . $thump_name;
+                $input['image'] = '/storage/image/event/' . $media_name;
+                $input['thump'] = '/storage/image/thump/' . $thump_name;
                 $media = new media();
                 $media->create(['event_id' => $event->id, 'image' => $input['image'], 'thump' => $input['thump']]);
             }
 
 
         }
-        return ['state' => 202];
-
+//        return ['state' => 202];
+          return response()->json(['success' =>true, 'message' => 'تم الارسال بنجاح', 'state' => 202 ]);
 
     }
 

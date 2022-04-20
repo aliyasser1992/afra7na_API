@@ -95,7 +95,7 @@ class AdsController extends Controller
 
         $image = $input['images'][0];
         $image_name = 'media-' . rand(10, 100) . date('mdYhis') . '.' . pathinfo($image->getClientOriginalName(), PATHINFO_EXTENSION);
-        $image_path = 'ads/';
+        $image_path = public_path().'/storage/image/ads/';
 //        Storage::disk('public')->putFileAs($image_path, $image, $image_name);
 
 
@@ -108,10 +108,10 @@ class AdsController extends Controller
             $constraint->aspectRatio();
         });
         $image->save($image_path . $image_name);
-        $input['image'] = '/ads/' . $image_name;
+        $input['image'] = '/storage/image/ads/' . $image_name;
 
 //        $input['is_admin'] = 1;
-        $input['state'] = 1;
+        $input['state'] = 0;
         $output = $ads::create($input);
         $ads_id = $output->id;
 
@@ -120,8 +120,8 @@ class AdsController extends Controller
         foreach ($input['images'] as $key => $image) {
             $image_name = rand(10, 100) . date('mdYhis') . '.' . $image->getClientOriginalName();
             $thump_name = 'media-' . rand(10, 100) . date('mdYhis') . '.' . pathinfo($image->getClientOriginalName(), PATHINFO_EXTENSION);
-            $image_path = 'ads/';
-            $thump_path = 'thump/';
+            $image_path = public_path().'/storage/image/ads/';
+            $thump_path = public_path().'/storage/image/thump/';
 
             $image = Image::make($image);
             $image->orientate();
@@ -141,8 +141,8 @@ class AdsController extends Controller
                 $constraint->aspectRatio();
             });
             $thump->save($thump_path . $thump_name);
-            $input['thump'] = '/thump/' . $thump_name;
-            $input['image'] = '/ads/' . $image_name;
+            $input['thump'] = '/storage/image/thump/' . $thump_name;
+            $input['image'] = '/storage/image/ads/' . $image_name;
             $input['ads_id'] = $ads_id;
             $this->media->create($input);
         }
@@ -246,7 +246,7 @@ class AdsController extends Controller
 //                $image_path = 'image/ads/';
 //                Storage::disk('public')->putFileAs($image_path, $image, $image_name);
                 $image_name = 'media-' . rand(10, 100) . date('mdYhis') . '.' . pathinfo($image->getClientOriginalName(), PATHINFO_EXTENSION);
-                $image_path = 'image/ads/';
+                $image_path =public_path().'/storage/image/ads/';
                 $photo = Image::make($image)
                     ->fit(1600, 1400, function ($constraint) {
 //            $constraint->aspectRatio();
@@ -258,7 +258,7 @@ class AdsController extends Controller
 
 
                 $thump_name = 'media-' . rand(10, 100) . date('mdYhis') . '.' . pathinfo($image->getClientOriginalName(), PATHINFO_EXTENSION);
-                $thump_path = 'thump/';
+                $thump_path = '/storage/image/thump/';
 
                 $height = Image::make($image)->height();
                 $newWidth = ($height * 8) / 5;
@@ -270,7 +270,7 @@ class AdsController extends Controller
                     ->encode('jpg', 50);
                 $thump->save($thump_path . $thump_name);
 
-                $input['thump'] = '/thump/' . $thump_name;
+                $input['thump'] = '/storage/image/thump/' . $thump_name;
 
 
                 $this->media->create($input);

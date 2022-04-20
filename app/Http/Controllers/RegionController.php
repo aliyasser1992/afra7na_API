@@ -49,7 +49,7 @@ class RegionController extends Controller
             ->get();
 //            dd(DB::getQuerylog());
 
-
+            
         return $userData;
     }
 
@@ -61,14 +61,14 @@ class RegionController extends Controller
 
     private function GetEventsCountIfLastSeenFound($lastSeen, $region_id)
     {
-//        return $lastSeen .': ' .$region_id;
-//        DB::enableQueryLog();
-
+//       dd($lastSeen .': ' .$region_id);
+        DB::enableQueryLog();
+        $lastSeen = date("Y-m-d H:i:s" , strtotime($lastSeen));
         $count_events = event::select(DB::raw('count(region_id) as event_count, region_id'))
             ->where('region_id', $region_id)
             ->where('created_at', '>=', $lastSeen)
-            ->whereRaw(DB::raw('(deleted_at IS NOT NULL and deleted_at <> "")'))
-            ->withTrashed()
+            ->whereRaw(DB::raw('(deleted_at IS  NULL )'))
+        //    ->withTrashed()
             ->first();
 //        dd(DB::getQuerylog());
 
@@ -80,10 +80,10 @@ class RegionController extends Controller
 //        DB::enableQueryLog();
 
         $count_events = event::select(DB::raw('count(region_id) as event_count, region_id'))
-            ->where('region_id', $region_id)
+            ->where('region_id', 1)
             ->where('created_at', '>=', date('Y-m-d H:i:s', strtotime(date('Y-m-d H:i:s') . " -48 hours")))
             ->where('created_at', '<=', date('Y-m-d H:i:s'))
-            ->whereRaw(DB::raw('(deleted_at IS NOT NULL and deleted_at <> "")'))
+            ->whereRaw(DB::raw('(deleted_at IS NOT NULL )'))
             ->withTrashed()
             ->first();
 //        dd(DB::getQuerylog());
@@ -101,30 +101,31 @@ class RegionController extends Controller
         $countObj = array();
         $countObj48 = array();
 
-        // if (isset(auth()->user()->id)) {
-        //     $userLastSeen = $this->GetLastUserLastSeen();
-        //     $regions = $this->GetRegionsBasedOnCountry();
+         if (auth()->check()) {
+           $userLastSeen = $this->GetLastUserLastSeen();
+             $regions = $this->GetRegionsBasedOnCountry();
 
-        //     foreach ($regions as $k => $region) {
-        //         if (count($userLastSeen) > 0):
-        //             foreach ($userLastSeen as $K2 => $lastSeen) {
-        //                 if ($lastSeen->region_id == $region->id) :
-        //                     $countData = $this->GetEventsCountIfLastSeenFound($lastSeen->created_at->format('Y-m-d H:i:s'), $lastSeen->region_id);
-        //                     $countObj[] = array(
-        //                         'region_id' => $lastSeen->region_id,
-        //                         'event_count' => $countData->event_count
-        //                     );
-        //                 endif;
-        //             }
-        //         endif;
-        //         $countData = $this->GetEventsCountBetweenTodayAnd48HoursAgo($region->id);
-        //         $countObj48[] = array(
-        //             'region_id' => $region->id,
-        //             'event_count' => $countData->event_count
-        //         );
+             foreach ($regions as $k => $region) {
+                 if (count($userLastSeen) > 0):
+                     foreach ($userLastSeen as $K2 => $lastSeen) {
+                         if ($lastSeen->region_id == $region->id) :
+//                             echo $lastSeen->created_at."====".$lastSeen->region_id."</br>";
+                             $countData = $this->GetEventsCountIfLastSeenFound($lastSeen->created_at, $lastSeen->region_id);
+                            $countObj[] = array(
+                                 'region_id' => $lastSeen->region_id,
+                                 'event_count' => $countData->event_count
+                            );
+                         endif;
+                     }
+                 endif;
+                 $countData = $this->GetEventsCountBetweenTodayAnd48HoursAgo($region->id);
+                 $countObj48[] = array(
+                    'region_id' => $region->id,
+                     'event_count' => $countData->event_count
+                 );
 
-        //     }
-        // }
+             }
+         }
 
         $id_arr = array();
         $final_arr = array();

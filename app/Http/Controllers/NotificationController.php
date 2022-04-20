@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use App\Model\adsNotifications;
 use App\Model\notification;
 use Illuminate\Http\Request;
-
+use App\Model\User;
+use Carbon\Carbon;
+use DB;
 class NotificationController extends Controller
 {
     /**
@@ -17,17 +19,21 @@ class NotificationController extends Controller
 
     public function index()
     {
-
-        $output = adsNotifications::where('country_id', request('country_id'));
-        if (request()->has('region_id')) {
-            $output = $output->where('region_id', request('region_id'));
+        if (auth()->check()) {
+                $output = adsNotifications::where('country_id', auth()->user()->country_id)->Orwhere('country_id' , 0);
+                $output = $output->where('region_id', auth()->user()->region_id)->Orwhere('region_id' , 0);
+                $user = User::find(auth()->user()->id);
+                $user->notification = Carbon::now()->format('Y-m-d H:i:s');
+                $user->save();
         }
-        $output = $output->Orwhere('region_id',0);
+       elseif (request('region_id') && request('country_id')){
+            $output = adsNotifications::where('region_id', request('region_id'))->ORwhere('region_id' , 0);
+            $output = $output->where('country_id', request('country_id'))->Orwhere('country_id' , 0);
+        }
         $output = $output->orderBy('id', 'desc')
             ->offset(0)
             ->limit(20)
             ->get();
-
         return $output;
 //            ->paginate(10);
     }

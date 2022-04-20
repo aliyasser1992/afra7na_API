@@ -92,9 +92,9 @@ class AuthController extends Controller
     public function admins(){
         $input=Request()->all();
         if(isset($input['filter'] )){
-            return Response()->json(['admins'=>Admin::withTrashed()->where('id','!=',31)->with('roles')->where('name','like','%'.$input['filter'].'%')->paginate(10)]);
+            return Response()->json(['admins'=>Admin::/*withTrashed()->*/where('id','!=',31)/*->with('roles')*/->where('name','like','%'.$input['filter'].'%')->paginate(10)]);
        }else{
-            return Response()->json(['admins'=>Admin::withTrashed()->where('id','!=',31)->with('roles')->paginate(10)]);
+            return Response()->json(['admins'=>Admin::/*withTrashed()->*/where('id','!=',31)/*->with('roles')*/->paginate(10)]);
         }
         }
 
@@ -147,15 +147,14 @@ class AuthController extends Controller
             return response()->json($validator->errors());
         }
         config()->set( 'auth.defaults.guard', 'admins' );
-        \Config::set('jwt.user', 'App\Admin');
-        \Config::set('auth.providers.users.model', \App\Admin::class);
+        config()->set('jwt.user', 'App\Admin');
+        config()->set('auth.providers.users.model', \App\Admin::class);
         $credentials = $request->only('email', 'password');
         if ($token = JWTAuth::attempt($credentials)) {
-
-            return $this->respondWithToken($token);
-
+	//if($token = auth()->attempt($credentials)){
+ 	return $this->respondWithToken($token);
         }else{
-    return response()->json(['error' => 'Unauthorized'], 401);
+		return response()->json(['error' => 'Unauthorized User'], 401);
         }
 
 
@@ -165,7 +164,7 @@ class AuthController extends Controller
 
         $validator = Validator::make($request->all(), [
             'name'=>'required',
-            'phone'=>'required',
+           // 'phone'=>'required',
             'email' => 'required|string|email|max:255|unique:admins',
             'password'=> 'required'
         ]);
@@ -175,11 +174,11 @@ class AuthController extends Controller
         config()->set( 'auth.defaults.guard', 'admins' );
         \Config::set('jwt.user', 'App\Admin');
         \Config::set('auth.providers.users.model', \App\Admin::class);
-        $credentials = $request->only('phone','password','name','email','role');
+        $credentials = $request->only('password','name','email');
 
         $credentials['password'] = hash::make($request->password);
 
-        $admin = Admin::create(['name'=>$credentials['name'],'email'=>$credentials['email'],'phone'=>$credentials['phone'],'password'=>$credentials['password']]);
+        $admin = Admin::create(['name'=>$credentials['name'],'email'=>$credentials['email'],'password'=>$credentials['password']]);
 
         $credential = request(['email', 'password']);
         if ($token = JWTAuth::attempt($credential)) {

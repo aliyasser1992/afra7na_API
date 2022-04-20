@@ -35,7 +35,7 @@ class AdsController extends Controller
      */
     public function index(Request $request)
     {
-
+         
         $user = new User();
         //Get Count of Events Between User Last Seen & Events Created_At
         // if Send User in Headers
@@ -75,25 +75,25 @@ class AdsController extends Controller
             $output = ads::where('ads_category_id', $request['ads_category_id'])
                 ->where('country_id', request('country_id'))
                 ->where('state', 1)
-                ->where('is_admin', null)
-//                ->with(['media', 'adsImages'])
-                ->orderBy('id', 'desc')
-                ->orderBy('special', 'desc')
-                ->orderBy('pin', 'desc')
-                ->paginate(10000);
+               // ->where('is_admin', null)
+               ->with(['media', 'adsImages'])
+                ->orderBy('id', 'brief')
+               // ->orderBy('special', 'brief')
+                //->orderBy('pin', 'desc')
+                ->paginate(20);
         else
             $output = ads::where('state', 1)
                 ->where('country_id', request('country_id'))
                 ->where('is_admin', null)
                 ->with('media')
                 ->orderBy('id', 'desc')
-//                ->with(['media', 'adsImages'])
-                ->orderBy('special', 'desc')
+               ->with(['media', 'adsImages'])
+               // ->orderBy('special', 'desc')
                 ->orderBy('pin', 'desc')
                 ->paginate(10000);
 
-
-//        $output[] = $countObj;
+               //dd($output);
+      //  $output[] = $countObj;
 
         //set last seen into users table
 
@@ -159,7 +159,7 @@ class AdsController extends Controller
 //        return auth()->user();
         $input = Request()->all();
 //        $input['user_id'] = Auth::id();
-        $input['user_id'] = 1;
+        $input['user_id'] = auth()->user()->id;
         $rules = [
             'title' => 'required|String',
             'brief' => 'required|String',
@@ -187,10 +187,10 @@ class AdsController extends Controller
 
         }
 
-
-        $image = $input['image'];
+        $input['state']=0;
+        $image = $input['media'][0];
         $image_name = 'media-' . rand(10, 100) . date('mdYhis') . '.' . pathinfo($image->getClientOriginalName(), PATHINFO_EXTENSION);
-        $image_path = 'ads/';
+        $image_path = public_path().'/storage/image/ads/';
         $image = Image::make($image);
         $image->orientate();
         $image->resize(1024, null, function ($constraint) {
@@ -199,7 +199,7 @@ class AdsController extends Controller
         });
         $image->save($image_path . $image_name);
 
-        $input['image'] = '/ads/' . $image_name;
+        $input['image'] = 'storage/image/ads/' . $image_name;
         $ads = new ads();
         $ad = $ads::create($input);
         //insert media
@@ -208,8 +208,8 @@ class AdsController extends Controller
                 $media = $input['media'][$i];
                 $image_name = 'media-' . ($i + 30 * 35) . '-' . rand(100, 1000) . '-' . ($i * 30 + 95) . '.' . $media->getClientOriginalName();
                 $thump_name = 'media-' . ($i + 30 * 35) . '-' . rand(100, 1000) . '-' . ($i * 30 + 95) . '.' . $media->getClientOriginalName();
-                $thump_path = 'thump/';
-                $image_path = 'ads/';
+                $thump_path = public_path().'/storage/image/thump/';
+                $image_path = public_path().'/storage/image/ads/';
 
                 $height = Image::make($media)->height();
                 $newWidth = ($height * 8) / 5;
@@ -229,8 +229,8 @@ class AdsController extends Controller
                 });
 
                 $thump->save($thump_path . $thump_name);
-                $input['image'] = '/ads/' . $image_name;
-                $input['thump'] = '/thump/' . $thump_name;
+                $input['image'] = '/storage/image/ads/' . $image_name;
+                $input['thump'] = '/storage/image/thump/' . $thump_name;
                 $media = new media();
                 $media->create(['ads_id' => $ad->id, 'image' => $input['image'], 'thump' => $input['thump']]);
             }
@@ -317,7 +317,7 @@ class AdsController extends Controller
         if (isset($input['image'])) {
             $image = $input['image'];
             $image_name = 'media-' . rand(10, 100) . date('mdYhis') . '.' . pathinfo($image->getClientOriginalName(), PATHINFO_EXTENSION);
-            $image_path = 'image/ads/';
+            $image_path =public_path().'/storage/image/ads/';
 
 
             $photo = Image::make($image)
@@ -327,7 +327,7 @@ class AdsController extends Controller
             Storage::disk('public')->put($image_path . $image_name, $photo);
 //
 //            Storage::disk('public')->putFileAs($image_path, $image, $image_name);
-            $input['image'] = '/storage/image/ads/' . $image_name;
+            $input['image'] = 'storage/image/ads/' . $image_name;
             ads::where('id', $id)->update(['title' => $input['title'], 'brief' => $input['brief'], 'phone' => $input['phone'], 'image' => $input['image'], 'ads_category_id' => $input['ads_category_id']]);
 
         } else {
@@ -342,8 +342,8 @@ class AdsController extends Controller
                 $media = $input['media'][$i];
                 $media_name = 'media-' . rand(10, 100) . date('mdYhis') . '.' . pathinfo($media->getClientOriginalName(), PATHINFO_EXTENSION);
                 $thump_name = 'media-' . ($i + 30) . rand(100, 1000) . $i . date('mdYhis') . '.' . $media->getClientOriginalName();
-                $thump_path = 'thump/';
-                $media_path = 'image/ads/';
+                $thump_path =public_path().'/storage/image/thump/';
+                $media_path =public_path(). '/storage/image/ads/';
 
                 $height = Image::make($media)->height();
                 $newWidth = ($height * 8) / 5;
@@ -364,8 +364,8 @@ class AdsController extends Controller
 
 //                Storage::disk('public')->putFileAs($media_path, $media, $media_name);
                 $thump->save($thump_path . $thump_name);
-                $input['thump'] = '/thump/' . $thump_name;
-                $input['image'] = '/storage/image/ads/' . $media_name;
+                $input['thump'] = 'storage/image/thump/' . $thump_name;
+                $input['image'] = 'storage/image/ads/' . $media_name;
                 $media = new media();
                 $media->create(['ads_id' => $id, 'image' => $input['image'], 'thump' => $input['thump']]);
             }

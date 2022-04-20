@@ -232,7 +232,7 @@ class AuthController extends Controller
                     $token = JWTAuth::fromUser($user);
                     return $this->respondWithToken($token);
                 } else {
-                    return response()->json(['success' => false, 'error' => array('message' => ['unauthorized User'])], 401);
+                    return response()->json(['success' => false, 'error' => array('message' => ['unauthorized'])], 401);
 
                 }
             }

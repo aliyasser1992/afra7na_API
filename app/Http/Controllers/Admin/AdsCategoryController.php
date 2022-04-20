@@ -53,8 +53,8 @@ class AdsCategoryController extends Controller
            return response()->json(['success'=> false, 'error'=> $validator->messages()],401);
        }
        $image=$input['image'];
-        $image_name = 'media-'.rand(10,100) . date('mdYhis') . '.' . pathinfo($image->getClientOriginalName() , PATHINFO_EXTENSION);
-        $image_path = 'image/ads_category/';
+        $image_name = 'ads-'.rand(10,100) . date('mdYhis') . '.' . pathinfo($image->getClientOriginalName() , PATHINFO_EXTENSION);
+        $image_path = 'image/ads/';
 //        $photo = Image::make($image);
 //          ->resize(300, null ,function ($constraint) {
 //            $constraint->aspectRatio();
@@ -62,7 +62,7 @@ class AdsCategoryController extends Controller
 //        Storage::disk('public')->put(  $image_path.$image_name, $photo);
         Storage::disk('public')->putFileAs($image_path, $image, $image_name);
 
-        $input['image']='/storage/image/ads_category/'.$image_name;
+        $input['image']='/storage/image/ads/'.$image_name;
         $ads_category = new ads_category();
         $ads_category::create($input);
        return ['state'=>202];

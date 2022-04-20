@@ -17,43 +17,43 @@ class AdsCategoryController extends Controller
     public function index(Request $request)
     {
 
-        $user = new User();
+       // $user = new User();
         //Get Count of Events Between User Last Seen & Events Created_At
         // if Send User in Headers
-        $countObj = array();
-        if (isset(auth()->user()->id)) {
-            $userData = $user->where('id', auth()->user()->id)->first();
-            $last_seen_ads = $userData->ads != '' ? $userData->ads : '';
-            $ads = new ads();
-            $count_ads = $ads;
-            if ($last_seen_ads != ''):
-                $count_ads = $count_ads->where('created_at', '>', $last_seen_ads);
-            endif;
-            $count_ads = $count_ads->where('country_id', request('country_id'));
-            $count_ads = $count_ads->count();
+        //$countObj = array();
+        //if (isset(auth()->user()->id)) {
+          //  $userData = $user->where('id', auth()->user()->id)->first();
+           // $last_seen_ads = $userData->ads != '' ? $userData->ads : '';
+           // $ads = new ads();
+           // $count_ads = $ads;
+            //if ($last_seen_ads != ''):
+              //  $count_ads = $count_ads->where('created_at', '>', $last_seen_ads);
+            //endif;
+            //$count_ads = $count_ads->where('country_id', request('country_id'));
+            //$count_ads = $count_ads->count();
             //set last seen into users table
-            if (!$request->hasHeader('type') && $request->header('type') == '') {
-                $update_last_seen = $user->where('id', auth()->user()->id)->update([
-                    'ads' =>date("Y-m-d H:i:s")
-                ]);
-            }else{
-                $update_last_seen = $user->where('id', auth()->user()->id)->update([
-                    'ads' => date("Y-m-d H:i:s")
-                ]);
-            }
+            //if (!$request->hasHeader('type') && $request->header('type') == '') {
+              //  $update_last_seen = $user->where('id', auth()->user()->id)->update([
+                //    'ads' =>date("Y-m-d H:i:s")
+                //]);
+           // }else{
+             //   $update_last_seen = $user->where('id', auth()->user()->id)->update([
+               //     'ads' => date("Y-m-d H:i:s")
+                //]);
+           // }
 
-        } else {
+        //} else {
 //            $count_ads = ads::where('country_id', request('country_id'))->count();
-            $count_ads = 0;
-        }
-        $countObj = array(
-            'count_ads' => $count_ads
-        );
-        $output = ads_category::all();
-        $output[] = $countObj;
+          //  $count_ads = 0;
+       // }
+        //$countObj = array(
+          //  'count_ads' => $count_ads
+        //);
+        return  ads_category::all();
+       // $output[] = $countObj;
 
 
-        return $output;
+//        return $output;
     }
 
     /**

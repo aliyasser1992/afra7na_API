@@ -45,7 +45,8 @@ return [
 
         'local' => [
             'driver' => 'local',
-            'root' => '',
+            'root' => ''
+,
         ],
 
         'public' => [

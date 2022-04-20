@@ -90,7 +90,7 @@ Route::group([
 
 Route::group([
 
-    'middleware' => 'api',
+    'middleware' => ['api','cors'],
     'prefix' => 'admin'
 
 ], function ($router) {

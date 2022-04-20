@@ -57,7 +57,7 @@ class CountryController extends Controller
        }
        $image=$input['image'];
        $image_name = 'flag-'.rand(10,100) . date('mdYhis') . '.' . pathinfo($image->getClientOriginalName() , PATHINFO_EXTENSION);
-       $image_path = 'image/event/';
+       $image_path = '/image/event/';
 //       $photo = Image::make($image)
 //         ->resize(300, null ,function ($constraint) {
 //           $constraint->aspectRatio();

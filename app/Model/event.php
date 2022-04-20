@@ -12,7 +12,7 @@ class event extends Model
 {
     use Rateable;
     use SoftDeletes;
-    protected $appends = ['thump','rating', 'userRate', 'userFavourite'];
+    protected $appends = ['thump',/*'rating', 'userRate',*/ 'userFavourite'];
     protected $hidden = [
 //        'created_at',
         'updated_at',
@@ -40,7 +40,8 @@ class event extends Model
         'latitude',
         'special',
         'from',
-        'to'
+        'to',
+        'created_at'
     ];
 
     public function getThumpAttribute($value){
@@ -102,7 +103,7 @@ class event extends Model
     {
         return $this->morphMany('App\Model\favourite', 'favourite');
     }
-
+/*
     public function getRatingAttribute()
     {
         return $this->attributes['rating'] = $this->averageRating() == null ? 0 : round($this->averageRating());
@@ -112,7 +113,7 @@ class event extends Model
     {
         return $this->attributes['userRate'] = round($this->userAverageRating);
     }
-
+*/
     public function getUserFavouriteAttribute()
     {
         if (Auth::user() != null) {

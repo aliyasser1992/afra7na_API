@@ -14,7 +14,7 @@ class Admin extends Authenticatable implements JWTSubject
 {
     use HasRoles;
 
-    use SoftDeletes;
+    //use SoftDeletes;
 
     protected $fillable = [
         'name',

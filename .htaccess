@@ -1,37 +1,40 @@
 <IfModule mod_rewrite.c>
-    <IfModule mod_negotiation.c>
-        Options -MultiViews -Indexes
-    </IfModule>
-
-    <Files .env>
-        Order allow,deny
-        Deny from all
-    </Files>
-
-    RewriteEngine On
-
-    RewriteCond %{REQUEST_URI} !^/gitPull\.php$ 
-
-    # Handle Authorization Header
-    RewriteCond %{HTTP:Authorization} .
-    RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
-
-    # Redirect Trailing Slashes If Not A Folder...
-    RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteCond %{REQUEST_URI} (.+)/$
-    RewriteRule ^ %1 [L,R=301]
-
-    # Force HTTPS to the URL
-    RewriteCond %{HTTPS} off
-    RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
-
-    # Remove index.php from the URL
-    RewriteCond %{THE_REQUEST} ^GET.*index\.php [NC]
-    RewriteRule (.*?)index\.php/*(.*) /v3/$1$2 [R=301,NE,L]
-
-    # Send Requests To Front Controller...
-    RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteCond %{REQUEST_FILENAME} !-f
-    RewriteRule ^ index.php [L]
-
+RewriteBase /
+<IfModule mod_negotiation.c>
+    Options -MultiViews -Indexes
 </IfModule>
+
+RewriteEngine On
+
+# Handle Authorization Header
+RewriteCond %{HTTP:Authorization} .
+RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+
+# Redirect Trailing Slashes If Not A Folder...
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_URI} (.+)/$
+RewriteRule ^ %1 [L,R=301]
+
+# Handle Front Controller...
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule ^ index.php [L]
+</IfModule>
+
+<IfModule !mod_rewrite.c>
+  ErrorDocument 404 /index.php
+</IfModule>
+
+#<Directory "/var/www/afra7na.com">
+ #   LimitRequestBody 102400 
+#</Directory>
+
+#<Files>
+#LimitRequestBody 20971520 
+#</Files>
+
+php_value upload_max_filesize 30000M
+php_value post_max_size 30000M
+php_value max_execution_time 3600
+php_value max_input_time 3600
+php_value max_file_uploads 1000

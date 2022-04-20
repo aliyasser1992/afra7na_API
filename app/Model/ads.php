@@ -28,10 +28,12 @@ class ads extends Model
         'country_id',
         'special',
         'from',
-        'to'
+        'to',
+        'created_at',
+        'updated_at'
     ];
 
-    protected $hidden = ['created_at', 'updated_at'];
+   // protected $hidden = ['created_at', 'updated_at'];
 
 
     public function ads_category()
