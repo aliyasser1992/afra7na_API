@@ -4,17 +4,18 @@ namespace App\Http\Controllers;
 
 use App\Model\country;
 use App\Model\User;
-use Hash;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use JWTAuth;
+use Tymon\JWTAuth\Facades\JWTAuth;
 use Response;
 use Storage;
-use Validator;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 //use Twilio\Rest\Client;
 use Unifonic;
 use GuzzleHttp\Client;
-
+use Illuminate\Contracts\Auth\Guard;
 
 class AuthController extends Controller
 {
@@ -25,7 +26,18 @@ class AuthController extends Controller
      */
     public function __construct()
     {
-        $this->middleware('auth:api', ['except' => ['login', 'register', 'check_code', 'resendCode', 'send_code_reset_password', 'reset_password']]);
+
+        $this->middleware('auth:api', [
+            'except' =>
+            [
+                'login',
+                'register',
+                'check_code',
+                'resendCode',
+                'send_code_reset_password',
+                'reset_password'
+            ]
+        ]);
     }
 
     /**
@@ -49,15 +61,12 @@ class AuthController extends Controller
         ]);
         try {
             $response = $http->post("http://basic.unifonic.com/rest/SMS/messages?AppSid=4JlNv1EgSRL4IPClSB9qm7SmL7ptMe&SenderID=Afrahna&Body=$vcode&Recipient=$phone&responseType=JSON&CorrelationID=%22%22&baseEncode=true&statusCallback=sent&async=false");
-
         } catch (\Exception $exception) {
             throw new  $exception;
         }
 
 
         return $response;
-
-
     }
 
     public function register(Request $request)
@@ -67,14 +76,14 @@ class AuthController extends Controller
         $input = Request()->all();
 
         $input['phone'] = country::where('id', $input['country_id'])->value('code') . $input['phone'];
-//        $checkVerify = User::where('phone', $input['phone'])->where('state', 0)->get();
-//        if (count($checkVerify) > 0) {
-//            User::where('phone', $input['phone'])->delete();
-//        }
+        //        $checkVerify = User::where('phone', $input['phone'])->where('state', 0)->get();
+        //        if (count($checkVerify) > 0) {
+        //            User::where('phone', $input['phone'])->delete();
+        //        }
 
         $rules = [
             'phone' => 'required',
-//            'name' => 'required|String',
+            //            'name' => 'required|String',
             //    'region_id' => 'required|Integer',
             'country_id' => 'required|Integer',
             'password' => 'required',
@@ -82,20 +91,30 @@ class AuthController extends Controller
 
         $validator = Validator::make($input, $rules);
         if ($validator->fails()) {
-            return response()->json(['success' => false, 'error' => $validator->messages()], 401);
+            return response()->json(['success' => false, 'error' => $validator->errors()], 401);
         }
         $input['password'] = Hash::make($request['password']);
 
-        $input['state'] = 0;
+        /**
+         * Activate User once registered and Cancel
+         * Phone number verification step
+         *
+         */
+        //$input['state'] = 0;
+        $input['state'] = 1;
 
         $output = User::updateOrCreate(['phone' => $input['phone']], $input);
 
-        $message = "    رمز التفعيل الخاص بك هو    $verification_code  ";
+        return response()->json([
+            'success' => true,
+            'message' => 'تم التسجيل بنجاح'
+        ]);
+
+      /*   $message = "    رمز التفعيل الخاص بك هو    $verification_code  ";
         $this->SendSMSWithVcode($input['phone'], $message);
-//        return Response()->json(['success' => true ,'code'=> 202]);
+        //        return Response()->json(['success' => true ,'code'=> 202]);
 
-        return response()->json(['success' => true, 'message' => 'تم تسجيل بنجاح انتظر كود التفعيل'], 202);
-
+        return response()->json(['success' => true, 'message' => 'تم تسجيل بنجاح انتظر كود التفعيل'], 202); */
     }
 
 
@@ -106,17 +125,13 @@ class AuthController extends Controller
         $user = User::where('phone', $request->phone)->where('state', 0)->count();
         if ($user > 0) {
             User::where('phone', $request->phone)->update(['verification_code' => $verification_code]);
-//            return $this->SendSMSWithrand($request->phone, $verification_code);
+            //            return $this->SendSMSWithrand($request->phone, $verification_code);
             $message = "    رمز التفعيل الخاص بك هو    $verification_code  ";
 
             return $this->SendSMSWithVcode($request->phone, $message);
-
-
         } else {
             return Response()->json(['error' => array('user' => ['unauthorized User'])], 401);
         }
-
-
     }
 
 
@@ -136,31 +151,31 @@ class AuthController extends Controller
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         $response = curl_exec($ch);
         if (curl_errno($ch)) {
-//            return Response()->json(['error' => array('message' => [curl_error($ch)])], 401);
+            //            return Response()->json(['error' => array('message' => [curl_error($ch)])], 401);
         }
         if (substr($response, 0, 3) != 'ERR') {
-//            return Response::json($response);
+            //            return Response::json($response);
         } else {
-//            return Response()->json(['error' => array('message' => [$response])], 401);
+            //            return Response()->json(['error' => array('message' => [$response])], 401);
 
         }
 
 
-        \Log::info($response);
+        Log::info($response);
         curl_close($ch);
-
-
     }
 
     private function sendMessage($message, $recipients)
     {
-//        return $recipients;
+        //        return $recipients;
         $account_sid = env("TWILIO_SID");
         $auth_token = env("TWILIO_AUTH_TOKEN");
         $twilio_number = env("TWILIO_NUMBER");
         $client = new Client($account_sid, $auth_token);
-        $client->messages->create($recipients,
-            ['from' => $twilio_number, 'body' => $message]);
+        $client->messages->create(
+            $recipients,
+            ['from' => $twilio_number, 'body' => $message]
+        );
     }
 
     public function check_code(Request $request)
@@ -169,15 +184,33 @@ class AuthController extends Controller
         $rules = [
             'phone' => 'required',
             'password' => 'required',
-            'verification_code' => 'required'
+            'verification_code' => 'nullable'
         ];
 
         $validator = Validator::make($input, $rules);
         if ($validator->fails()) {
-            return response()->json(['success' => false, 'error' => $validator->messages()], 401);
+            return response()->json(['success' => false, 'error' => $validator->errors()], 401);
         }
         $user = User::where('phone', $input['phone'])->first();
-        if ($input['verification_code'] == $user['verification_code']) {
+        if (!$user) {
+            return response()->json(['success' => false, 'error' => array('user' => ['Verification code you entered not valid'])], 401);
+        }
+
+        /**
+         * Remove Verification Code implementation
+         * and verify user only with Phone and password
+         *
+         */
+        $user->update([
+            'state' => 1
+        ]);
+        $credentials = $request->only('phone', 'password');
+        if ($token = JWTAuth::attempt($credentials)) {
+            return $this->respondWithToken($token);
+        } else {
+            return response()->json(['success' => false, 'error' => array('user' => ['unauthorized'])], 401);
+        }
+        /* if ($input['verification_code'] == $user['verification_code']) {
             User::where('phone', $input['phone'])->update(['state' => 1]);
             $credentials = $request->only('phone', 'password');
             if ($token = JWTAuth::attempt($credentials)) {
@@ -187,9 +220,7 @@ class AuthController extends Controller
             }
         } else {
             return response()->json(['success' => false, 'error' => array('user' => ['Verification code you entered not valid'])], 401);
-        }
-
-
+        } */
     }
 
 
@@ -206,42 +237,55 @@ class AuthController extends Controller
         $validator = Validator::make($credentials, $rules);
         if ($validator->fails()) {
 
-            return response()->json(['success' => false, 'error' => $validator->messages()], 401);
+            return response()->json(['success' => false, 'error' => $validator->errors()], 401);
         }
         $user = User::where('phone', $request->phone)->first();
 
-        if ($user != null) {
-//            if ($user['id'] == 48) {
-////                return 'a7a';
-//                $verification_code = "1111";
-//            } else {
-////                return 'sha7raa';
-//                $verification_code = rand(1000, 10000);
-//            }
-//            $verification_code = "1111";
-//return $user->state;
+        /**
+         * Cancel User Phone verification Step
+         *
+         */
+        if (!$user) {
+            return response()->json(['success' => false, 'error' => array('message' => ['unauthorized User'])], 401);
+        }
+
+        if ($token = JWTAuth::attempt($credentials)) {
+            //                return 3;
+            $token = JWTAuth::fromUser($user);
+            return $this->respondWithToken($token);
+        } else {
+            return response()->json(['success' => false, 'error' => array('message' => ['unauthorized User'])], 401);
+        }
+
+       /*  if ($user != null) {
+            //            if ($user['id'] == 48) {
+            ////                return 'a7a';
+            //                $verification_code = "1111";
+            //            } else {
+            ////                return 'sha7raa';
+            //                $verification_code = rand(1000, 10000);
+            //            }
+            //            $verification_code = "1111";
+            //return $user->state;
             if ($user->state == 0) {
-//                return 2;
-//                $user->update(['state' => 0, 'verification_code' => $verification_code]);
-//                return $this->SendSMSWithrand($request->phone, $verification_code);
-//                User::where('phone', $request->phone)->delete();
+                //                return 2;
+                //                $user->update(['state' => 0, 'verification_code' => $verification_code]);
+                //                return $this->SendSMSWithrand($request->phone, $verification_code);
+                //                User::where('phone', $request->phone)->delete();
                 return response()->json(['success' => false, 'error' => array('message' => ['this account not verify yet'])], 401);
             } else {
                 if ($token = JWTAuth::attempt($credentials)) {
-//                return 3;
+                    //                return 3;
                     $token = JWTAuth::fromUser($user);
                     return $this->respondWithToken($token);
                 } else {
                     return response()->json(['success' => false, 'error' => array('message' => ['unauthorized User'])], 401);
-
                 }
             }
         } else {
 
             return response()->json(['success' => false, 'error' => array('message' => ['unauthorized User'])], 401);
-
-        }
-
+        } */
     }
 
     public function update_profile(Request $request)
@@ -255,14 +299,12 @@ class AuthController extends Controller
         $validator = Validator::make($input, $rules);
 
         if ($validator->fails()) {
-            return response()->json(['success' => false, 'error' => $validator->messages()], 401);
+            return response()->json(['success' => false, 'error' => $validator->errors()], 401);
         }
         $user = User::where('id', Auth::id())->first();
-//        $user = User::where('id', auth()->user()->id)->first();
+        //        $user = User::where('id', auth()->user()->id)->first();
         $user->update($input);
         return ['state' => 202];
-
-
     }
 
 
@@ -283,6 +325,7 @@ class AuthController extends Controller
      */
     public function logout()
     {
+
         $this->guard()->logout();
 
         return response()->json(['message' => 'Successfully logged out']);
@@ -305,11 +348,11 @@ class AuthController extends Controller
         $rules = [
             'phone' => 'required|exists:users',
         ];
-//        $input['phone'] = country::where('id', $input['country_id'])->value('code') . $input['phone'];
+        //        $input['phone'] = country::where('id', $input['country_id'])->value('code') . $input['phone'];
 
         $validator = Validator::make($input, $rules);
         if ($validator->fails()) {
-            return response()->json(['success' => false, 'error' => $validator->messages()], 400);
+            return response()->json(['success' => false, 'error' => $validator->errors()], 400);
         }
         $verification_code = rand('1000', '10000');
         User::where('phone', $input['phone'])->update(['verification_code' => $verification_code]);
@@ -330,7 +373,7 @@ class AuthController extends Controller
 
         $validator = Validator::make($input, $rules);
         if ($validator->fails()) {
-            return response()->json(['success' => false, 'error' => $validator->messages()], 400);
+            return response()->json(['success' => false, 'error' => $validator->errors()], 400);
         }
         $user = User::where('phone', $input['phone'])->first();
         if ($user['verification_code'] == $input['verification_code']) {
