@@ -174,12 +174,13 @@ return [
         App\Providers\BroadcastServiceProvider::class,
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
+        App\Providers\GoogleDriveServiceProvider::class,
         Tymon\JWTAuth\Providers\LaravelServiceProvider::class,
         willvincent\Rateable\RateableServiceProvider::class,
         Spatie\Permission\PermissionServiceProvider::class,
         Intervention\Image\ImageServiceProvider::class,
         LaravelFCM\FCMServiceProvider::class,
-
+        App\Providers\DropboxServiceProvider::class,
 
 
 

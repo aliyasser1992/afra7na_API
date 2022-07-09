@@ -67,7 +67,7 @@ class AdsNotificationsController extends Controller
 //                DB::enableQuerylog();
         if ($country_id != 0 && $region_id == 0) {
             $notification_count = $this->CountNotificationByCountry($country_id);
-            $this->TopicNotification((string)"country_id_" . $country_id, $text, (string)$notification_count);
+            $this->TopicNotification("all", $text, (string)$notification_count);
         } else if ($country_id != 0 && $region_id != 0) {
             // function return all users in this regions with last seen of notification
 //            $users = $this->GetUsersLastSeenByRegionId($region_id);
@@ -79,11 +79,12 @@ class AdsNotificationsController extends Controller
 //                // but in each time how many notification send to user ??!!!!
 //            }
             $badge = $this->CountNotificationsByRegions($region_id);
-            $this->TopicNotification((string)"region_id_" . $region_id, $text, (string)$badge);
+            $this->TopicNotification("all", $text, (string)$badge);
 
         } else {
+               
             $badge = $this->CountNotificationsByRegions(0);
-            $this->TopicNotification((string)'region_id_0', $text , $badge);
+            $this->TopicNotification('all', $text , $badge);
         }
 
 

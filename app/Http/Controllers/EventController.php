@@ -363,7 +363,7 @@ class EventController extends Controller
         if ($event_image['current_page'] == '1'):
             array_splice($event_image['data'], 0, 0, $special_image); // splice in at position 3
         endif;
-
+//         dd(array_splice($event_image['data'], 0,0 ,$special_image));
 
         if ($output->ad_image != null) {
 
@@ -380,7 +380,7 @@ class EventController extends Controller
             $newSort = $sort - 1; // 66 - 1 = 65
             // take 5
             $newSort = str_split($newSort);
-
+//            dd($newSort);
 //            return $newSort[0];
 
             if (count($newSort) > 1):
@@ -388,10 +388,14 @@ class EventController extends Controller
             else:
                 $newSort = $newSort[0] == 1 || $newSort[0] == 2 ? $newSort[0] : $newSort[0] - 1;
             endif;
-
+//            dd(str_split($event_image['to']));
             $page = str_split($event_image['to']);
-            $pageNum = count($page) == 2 ? $page[0] : $page[1];
-
+//            $pageNum = count($page) == 2 ? $page[0] : $page[1];
+            if(count($page) == 2 && isset($page[1])){
+               $pageNum =  $page[1];
+            }else{
+               $pageNum = $page[0];
+             }
 //            return $event_image['current_page'] .'    '. $pageNum;
             if ($event_image['current_page'] == $pageNum && $event_image['last_page'] > $event_image['current_page']):
                 if ($output->ad_image_sort >= $event_image['from'] && $event_image['to'] >= $output->ad_image_sort):

@@ -13,6 +13,8 @@ use Illuminate\Http\Request;
 |
 */
 
+
+
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
@@ -120,6 +122,11 @@ Route::group([
     'namespace' => 'Admin'
 
 ], function () {
+
+
+//    Route::get("test" , function(){
+//     Storageq::disk('google')->put('hello.txt' , 'Hello World');
+//});
     //reset password
     Route::post('reset_password', 'AuthController@reset_password');
 

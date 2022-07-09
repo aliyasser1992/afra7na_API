@@ -19,22 +19,23 @@ class NotificationController extends Controller
 
     public function index()
     {
-        if (auth()->check()) {
-                $output = adsNotifications::where('country_id', auth()->user()->country_id)->Orwhere('country_id' , 0);
-                $output = $output->where('region_id', auth()->user()->region_id)->Orwhere('region_id' , 0);
-                $user = User::find(auth()->user()->id);
-                $user->notification = Carbon::now()->format('Y-m-d H:i:s');
-                $user->save();
-        }
-       elseif (request('region_id') && request('country_id')){
-            $output = adsNotifications::where('region_id', request('region_id'))->ORwhere('region_id' , 0);
-            $output = $output->where('country_id', request('country_id'))->Orwhere('country_id' , 0);
-        }
-        $output = $output->orderBy('id', 'desc')
+//        if (auth()->check()) {
+//                $output = adsNotifications::where('country_id', auth()->user()->country_id)->Orwhere('country_id' , 0);
+//                $output = $output->where('region_id', auth()->user()->region_id)->Orwhere('region_id' , 0);
+//                $user = User::find(auth()->user()->id);
+//                $user->notification = Carbon::now()->format('Y-m-d H:i:s');
+//                $user->save();
+//        }
+//       elseif (request('region_id') && request('country_id')){
+//            $output = adsNotifications::where('region_id', request('region_id'))->ORwhere('region_id' , 0);
+//            $output = $output->where('country_id', request('country_id'))->Orwhere('country_id' , 0);
+//        }
+//        $output =
+               return  adsNotifications::orderBy('id', 'desc')
             ->offset(0)
             ->limit(20)
             ->get();
-        return $output;
+//        return $output;
 //            ->paginate(10);
     }
 

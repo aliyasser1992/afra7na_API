@@ -18,10 +18,13 @@
         "intervention/image": "^2.5",
         "laravel/framework": "5.7.*",
         "laravel/tinker": "^1.0",
-        "pusher/pusher-php-server": "^7.0",
+        "nao-pon/flysystem-google-drive": "~1.1",
+        "pusher/pusher-php-server": "^4.1.1",
+        "spatie/flysystem-dropbox": "^1.0.0",
+        "spatie/laravel-backup": "^5.0.0",
         "spatie/laravel-permission": "^2.37",
         "tymon/jwt-auth": "^1.0.0-rc.2",
-        "willvincent/laravel-rateable": "^1.07"
+        "willvincent/laravel-rateable": "^1.0.9"
     },
     "require-dev": {
         "filp/whoops": "^2.0",

@@ -25,7 +25,8 @@ class EventController extends Controller
      */
     public function index(eventsFilter $filters)
     {
-        return event::filter($filters)->with('country', 'region', 'user', 'media')->withTrashed()->paginate(10);
+        return event::filter($filters)->with('country', 'region', 'user', 'media')->withTrashed()->
+               orderBy('created_at', 'DESC')->paginate(10);
     }
 
     /**
@@ -119,7 +120,9 @@ class EventController extends Controller
 
         event::where('id', $id)->update([
             'ad_image' => null,
-            'ad_image_sort' => null
+            'ad_image_sort' => null,
+            'ad_image_thump' => null,
+            'ads_link' => null
         ]);
         return ['state' => 202];
     }
@@ -127,11 +130,11 @@ class EventController extends Controller
     public function event_ad_image(Request $request, $id)
     {
 
-
+//        dd($request->all());
         $input = Request()->all();
         $rules = [
             'ad_image_sort' => 'required|integer',
-//            'ad_image' => 'mimes:jpeg,jpg,png,gif|max:10000'
+            'ad_image' => 'mimes:jpeg,jpg,png,gif|max:10000'
         ];
 
         $validator = Validator::make($input, $rules);
@@ -141,10 +144,12 @@ class EventController extends Controller
         if ($request->has('ad_image')) {
             $image = $input['ad_image'];
             $image_name = 'media-' . rand(10, 100) . date('mdYhis') . '.' . pathinfo($image->getClientOriginalName(), PATHINFO_EXTENSION);
-            $image_path = 'image/event/';
-            Storage::disk('public')->putFileAs($image_path, $image, $image_name);
+            $image_path =public_path().'/storage/image/event/';
+//            Storage::disk('public')->putFileAs($image_path, $image, $image_name);
+            
             $input['ad_image'] = '/storage/image/event/' . $image_name;
-
+            $image1 = Image::make($image);
+            $image1->save($image_path . $image_name);
             $thump_name = 'media-' . rand(10, 100) . date('mdYhis') . '.' . pathinfo($image->getClientOriginalName(), PATHINFO_EXTENSION);
             $height = Image::make($image)->height();
             $newWidth = ($height * 8) / 5;
@@ -154,9 +159,9 @@ class EventController extends Controller
                     $constraint->upsize();
                 })
                 ->encode('jpg', 50);
-            $thump_path = 'thump/';
+            $thump_path = public_path().'/storage/image/thump/';
             $thump->save($thump_path . $thump_name);
-            $input['thump'] = '/thump/' . $thump_name;
+            $input['thump'] = '/storage/image/thump/' . $thump_name;
 
 
             $output = event::where('id', $id)->update([
@@ -197,6 +202,9 @@ class EventController extends Controller
     public function trached($id)
     {
         event::where('id', $id)->delete();
+        event::where('id' , $id)->update([
+           'created_at' => null
+        ]);
         return Response()->json(['event' => 'trached'], 200);
     }
 
