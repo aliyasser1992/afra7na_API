@@ -40,33 +40,32 @@ class AuthController extends Controller
      */
     public function me()
     {
-        config()->set( 'auth.defaults.guard', 'admins' );
+        config()->set('auth.defaults.guard', 'admins');
         \Config::set('jwt.user', 'App\Admin');
         \Config::set('auth.providers.users.model', \App\Admin::class);
         return response()->json(auth()->user());
     }
 
 
-     public function reset_password()
+    public function reset_password()
     {
-        $input=Request()->all();
+        $input = Request()->all();
         $validator = Validator::make($input, [
             'old_password' => 'required',
-            'new_password'=> 'required'
+            'new_password' => 'required'
         ]);
         if ($validator->fails()) {
             return response()->json($validator->errors());
         }
-            if(Hash::check($input['old_password'], Admin::where('id',Auth::id())->value('password'))){
-            Admin::where('id',Auth::id())->update(['password'=>hash::make($input['new_password'])
+        if (Hash::check($input['old_password'], Admin::where('id', Auth::id())->value('password'))) {
+            Admin::where('id', Auth::id())->update([
+                'password' => hash::make($input['new_password'])
             ]);
-            return ['state'=>202];
-        }else{
+            return ['state' => 202];
+        } else {
 
-            return Response()->json(['error'=>"old password doesn't right"]);
+            return Response()->json(['error' => "old password doesn't right"]);
         }
-
-
     }
 
 
@@ -89,28 +88,32 @@ class AuthController extends Controller
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function admins(){
-        $input=Request()->all();
-        if(isset($input['filter'] )){
-            return Response()->json(['admins'=>Admin::/*withTrashed()->*/where('id','!=',31)/*->with('roles')*/->where('name','like','%'.$input['filter'].'%')->paginate(10)]);
-       }else{
-            return Response()->json(['admins'=>Admin::/*withTrashed()->*/where('id','!=',31)/*->with('roles')*/->paginate(10)]);
+    public function admins()
+    {
+        $input = Request()->all();
+        if (isset($input['filter'])) {
+            return Response()->json(['admins' => Admin::/*withTrashed()->*/where('id', '!=', 31)/*->with('roles')*/->where('name', 'like', '%' . $input['filter'] . '%')->paginate(10)]);
+        } else {
+            return Response()->json(['admins' => Admin::/*withTrashed()->*/where('id', '!=', 31)/*->with('roles')*/->paginate(10)]);
         }
-        }
-
-
-
-    public function destroy($id){
-        Admin::where('id',$id)->forceDelete();
-        return Response()->json(['Admin'=>'deleted'],200);
     }
-    public function trached($id){
-        Admin::where('id',$id)->delete();
-        return Response()->json(['Admin'=>'trached'],200);
+
+
+
+    public function destroy($id)
+    {
+        Admin::where('id', $id)->forceDelete();
+        return Response()->json(['Admin' => 'deleted'], 200);
     }
-    public function cancel_trached($id){
-        Admin::where('id',$id)->restore();
-        return Response()->json(['Admin'=>'cancel_trached'],200);
+    public function trached($id)
+    {
+        Admin::where('id', $id)->delete();
+        return Response()->json(['Admin' => 'trached'], 200);
+    }
+    public function cancel_trached($id)
+    {
+        Admin::where('id', $id)->restore();
+        return Response()->json(['Admin' => 'cancel_trached'], 200);
     }
 
 
@@ -132,99 +135,93 @@ class AuthController extends Controller
             'access_token' => $token,
             'token_type' => 'bearer',
             'expires_in' => auth()->factory()->getTTL() * 60,
-            'admin'=>Auth::user()
+            'admin' => Auth::user()
         ]);
     }
 
 
-        public function adminLogin(Request $request){
+    public function adminLogin(Request $request)
+    {
 
         $validator = Validator::make($request->all(), [
             'email' => 'required|string|email|max:255',
-            'password'=> 'required'
+            'password' => 'required'
         ]);
         if ($validator->fails()) {
-            return response()->json($validator->errors());
+            return response()->json($validator->errors(), 422);
         }
-        config()->set( 'auth.defaults.guard', 'admins' );
+        config()->set('auth.defaults.guard', 'admins');
         config()->set('jwt.user', 'App\Admin');
         config()->set('auth.providers.users.model', \App\Admin::class);
         $credentials = $request->only('email', 'password');
         if ($token = JWTAuth::attempt($credentials)) {
-	//if($token = auth()->attempt($credentials)){
- 	return $this->respondWithToken($token);
-        }else{
-		return response()->json(['error' => 'Unauthorized User'], 401);
+            //if($token = auth()->attempt($credentials)){
+            return $this->respondWithToken($token);
+        } else {
+            return response()->json(['error' => 'Unauthorized User'], 401);
         }
-
-
     }
 
-    public function adminRegister(Request $request){
+    public function adminRegister(Request $request)
+    {
 
         $validator = Validator::make($request->all(), [
-            'name'=>'required',
-           // 'phone'=>'required',
+            'name' => 'required',
+            // 'phone'=>'required',
             'email' => 'required|string|email|max:255|unique:admins',
-            'password'=> 'required'
+            'password' => 'required'
         ]);
         if ($validator->fails()) {
-            return response()->json(['success'=> false, 'error'=> $validator->messages()],400);
+            return response()->json(['success' => false, 'error' => $validator->messages()], 400);
         }
-        config()->set( 'auth.defaults.guard', 'admins' );
+        config()->set('auth.defaults.guard', 'admins');
         \Config::set('jwt.user', 'App\Admin');
         \Config::set('auth.providers.users.model', \App\Admin::class);
-        $credentials = $request->only('password','name','email');
+        $credentials = $request->only('password', 'name', 'email');
 
         $credentials['password'] = hash::make($request->password);
 
-        $admin = Admin::create(['name'=>$credentials['name'],'email'=>$credentials['email'],'password'=>$credentials['password']]);
+        $admin = Admin::create(['name' => $credentials['name'], 'email' => $credentials['email'], 'password' => $credentials['password']]);
 
         $credential = request(['email', 'password']);
         if ($token = JWTAuth::attempt($credential)) {
 
             return $this->respondWithToken($token);
-
-        }else{
-    return response()->json(['error' => 'Unauthorized'], 401);
+        } else {
+            return response()->json(['error' => 'Unauthorized'], 401);
         }
-
-
     }
 
 
 
-    public function editAdmin(Request $request,$id){
+    public function editAdmin(Request $request, $id)
+    {
 
-    $validator = Validator::make($request->all(), [
-        'email' => 'required|string|email|max:255',
-        'password'=> 'required'
-    ]);
-    if ($validator->fails()) {
-        return response()->json($validator->errors());
+        $validator = Validator::make($request->all(), [
+            'email' => 'required|string|email|max:255',
+            'password' => 'required'
+        ]);
+        if ($validator->fails()) {
+            return response()->json($validator->errors());
+        }
+        config()->set('auth.defaults.guard', 'admins');
+        \Config::set('jwt.user', 'App\Admin');
+        \Config::set('auth.providers.users.model', \App\Admin::class);
+        $credentials = $request->only('phone', 'password', 'name', 'email');
+
+        $credentials['password'] = hash::make($request->password);
+
+        $admin = Admin::where('id', $id)->update($credentials);
+
+
+
+
+        $credential = request(['email', 'password']);
+        if ($token = JWTAuth::attempt($credential)) {
+
+            return $this->respondWithToken($token);
+        } else {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
     }
-    config()->set( 'auth.defaults.guard', 'admins' );
-    \Config::set('jwt.user', 'App\Admin');
-    \Config::set('auth.providers.users.model', \App\Admin::class);
-    $credentials = $request->only('phone','password','name','email');
-
-    $credentials['password'] = hash::make($request->password);
-
-    $admin = Admin::where('id',$id)->update($credentials);
-
-
-
-
-    $credential = request(['email', 'password']);
-    if ($token = JWTAuth::attempt($credential)) {
-
-        return $this->respondWithToken($token);
-
-    }else{
-return response()->json(['error' => 'Unauthorized'], 401);
-    }
-
-
-}
-
 }

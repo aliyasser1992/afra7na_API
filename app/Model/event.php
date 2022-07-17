@@ -124,4 +124,9 @@ class event extends Model
         }
 
     }
+    public function banners()
+    {
+        return $this->hasMany(Banner::class, 'event_id');
+    }
+
 }

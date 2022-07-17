@@ -45,7 +45,12 @@ return [
 
         'local' => [
             'driver' => 'local',
-            'root' => '',
+            'root' => storage_path('app/public'),
+        ],
+
+        'backup' => [
+            'driver' => 'local',
+            'root' => storage_path('app/public/backups'),
         ],
 
          'google' => [

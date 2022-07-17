@@ -18,7 +18,8 @@ return [
                  * The list of directories and files that will be included in the backup.
                  */
                 'include' => [
-                    public_path('/storage/image'),
+                    public_path(''),
+                    storage_path(''),
                 ],
 
                 /*
@@ -96,6 +97,7 @@ return [
              */
             'disks' => [
                 'google',
+                'backup',
             ],
         ],
 

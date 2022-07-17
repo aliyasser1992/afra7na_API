@@ -146,7 +146,7 @@ class EventController extends Controller
             $image_name = 'media-' . rand(10, 100) . date('mdYhis') . '.' . pathinfo($image->getClientOriginalName(), PATHINFO_EXTENSION);
             $image_path =public_path().'/storage/image/event/';
 //            Storage::disk('public')->putFileAs($image_path, $image, $image_name);
-            
+
             $input['ad_image'] = '/storage/image/event/' . $image_name;
             $image1 = Image::make($image);
             $image1->save($image_path . $image_name);
@@ -216,5 +216,12 @@ class EventController extends Controller
             'created_at' => date('Y-m-d H:i:s')
         ]);
         return Response()->json(['event' => 'cancel_trached'], 200);
+    }
+
+    public function EventList()
+    {
+        $events = event::select('id', 'title')->get();
+
+        return response()->json($events);
     }
 }

@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\Admin\Backup\BackupController;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 
 /*
@@ -123,6 +125,18 @@ Route::group([
 
 ], function () {
 
+    Route::group(['prefix' => 'backup'], function () {
+        Route::post('create', 'Backup\BackupController@create');
+        Route::post('files', 'Backup\BackupController@files');
+    });
+
+
+    Route::group(['prefix' => 'advertising'], function () {
+
+        Route::get('advertisers/list', 'Advertising\AdvertiserController@getList');
+        Route::resource('advertisers', 'Advertising\AdvertiserController');
+        Route::resource('banners', 'Advertising\BannerController');
+    });
 
 //    Route::get("test" , function(){
 //     Storageq::disk('google')->put('hello.txt' , 'Hello World');
@@ -130,6 +144,7 @@ Route::group([
     //reset password
     Route::post('reset_password', 'AuthController@reset_password');
 
+    Route::get('event/event-list', 'EventController@EventList');
     Route::resource('event', 'EventController');
 
     //force delete event

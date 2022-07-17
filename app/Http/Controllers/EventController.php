@@ -8,12 +8,15 @@ use App\Model\media;
 use App\Model\User;
 use App\Model\UserEvents;
 use Carbon\Carbon;
-use DB;
+use Exception;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use Image;
-use Storage;
-use Validator;
-use Str;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
+
 
 class EventController extends Controller
 {
@@ -24,7 +27,7 @@ class EventController extends Controller
      */
     private function CreateViewINUsersEvent($country_id, $region_id, $category)
     {
-//        return $category;
+        //        return $category;
         $user_events = new UserEvents();
 
         $insertIntoUserEvent = $user_events->create([
@@ -37,20 +40,20 @@ class EventController extends Controller
         ]);
     }
 
-// if first time enter this regions or 48 hr
+    // if first time enter this regions or 48 hr
     private function GetLastUserLastSeen($category)
     {
         $user_events = new UserEvents();
-//                    DB::enableQueryLog();
+        //                    DB::enableQueryLog();
         $userData = $user_events
             ->select(DB::raw('id,user_id,country_id,region_id,max(created_at) as created_at '))
             ->where('user_id', auth()->user()->id)
             ->where('region_id', request('region_id'));
-        if ($category == 1):
+        if ($category == 1) :
             $userData = $userData->where('wedding', '1');
-        elseif ($category == 2):
+        elseif ($category == 2) :
             $userData = $userData->where('occasions', '1');
-        elseif ($category == 3):
+        elseif ($category == 3) :
             $userData = $userData->where('invitations', '1');
         endif;
         $userData = $userData
@@ -58,7 +61,7 @@ class EventController extends Controller
             ->where('created_at', '<=', date('Y-m-d H:i:s'))
             ->groupBy('region_id')
             ->first();
-//            dd(DB::getQuerylog());
+        //            dd(DB::getQuerylog());
 
 
         return $userData;
@@ -66,7 +69,7 @@ class EventController extends Controller
 
     private function GetEventsCountIfLastSeenFound($lastSeen, $region_id)
     {
-//        return $lastSeen .': ' .$region_id;
+        //        return $lastSeen .': ' .$region_id;
 
         $count_events = event::select(DB::raw('count(region_id) as event_count, region_id'))
             ->where('region_id', $region_id)
@@ -81,8 +84,8 @@ class EventController extends Controller
             ->where('region_id', $region_id)
             ->where('created_at', '>=', date('Y-m-d H:i:s', strtotime(date('Y-m-d H:i:s') . " -48 hours")))
             ->where('created_at', '<=', date('Y-m-d H:i:s'))
-//            ->where('deleted_at'  ,null)
-//            ->withNoTrashed()
+            //            ->where('deleted_at'  ,null)
+            //            ->withNoTrashed()
             ->first();
         return $count_events;
     }
@@ -95,9 +98,9 @@ class EventController extends Controller
         //Get Count of Events Between User Last Seen & Events Created_At
         // if Send User in Headers
         $countObj = array();
-//
+        //
         if (isset(auth()->user()->id)) {
-//            return  auth()->user();
+            //            return  auth()->user();
             //set last seen into users table
             if (request('category') == '1') {
                 $this->CreateViewINUsersEvent(request('country_id'), request('region_id'), 1);
@@ -114,7 +117,7 @@ class EventController extends Controller
             $count_weeding = event::where('main_category_id', '1');
             if ($last_seen_wedding != '') :
                 $count_weeding = $count_weeding->where('created_at', '>=', $last_seen_wedding);
-            else:
+            else :
                 $count_weeding = $count_weeding
                     ->where('created_at', '>=', date('Y-m-d H:i:s', strtotime(date('Y-m-d H:i:s') . " -48 hours")))
                     ->where('created_at', '<=', date('Y-m-d H:i:s'));
@@ -123,13 +126,13 @@ class EventController extends Controller
                 ->where('country_id', request('country_id'))
                 ->where('region_id', request('region_id'));
             $count_weeding = $count_weeding->count();
-//return $last_seen_occasions;
-//                                DB::enableQueryLog();
+            //return $last_seen_occasions;
+            //                                DB::enableQueryLog();
 
             $count_occasions = event::where('main_category_id', '2');
-            if ($last_seen_occasions != ''):
+            if ($last_seen_occasions != '') :
                 $count_occasions = $count_occasions->where('created_at', '>=', $last_seen_occasions);
-            else:
+            else :
                 $count_occasions = $count_occasions
                     ->where('created_at', '>=', date('Y-m-d H:i:s', strtotime(date('Y-m-d H:i:s') . " -48 hours")))
                     ->where('created_at', '<=', date('Y-m-d H:i:s'));
@@ -138,13 +141,13 @@ class EventController extends Controller
                 ->where('country_id', request('country_id'))
                 ->where('region_id', request('region_id'));
             $count_occasions = $count_occasions->count();
-//                         dd(DB::getQuerylog());
+            //                         dd(DB::getQuerylog());
 
-//return $count_occasions;
+            //return $count_occasions;
             $count_invitations = event::where('main_category_id', '3');
-            if ($last_seen_invitations != ''):
+            if ($last_seen_invitations != '') :
                 $count_invitations = $count_invitations->where('created_at', '>=', $last_seen_invitations);
-            else:
+            else :
                 $count_invitations = $count_invitations
                     ->where('created_at', '>=', date('Y-m-d H:i:s', strtotime(date('Y-m-d H:i:s') . " -48 hours")))
                     ->where('created_at', '<=', date('Y-m-d H:i:s'));
@@ -153,7 +156,6 @@ class EventController extends Controller
                 ->where('country_id', request('country_id'))
                 ->where('region_id', request('region_id'));
             $count_invitations = $count_invitations->count();
-
         } else {
             $count_weeding = 0;
             $count_occasions = 0;
@@ -166,11 +168,11 @@ class EventController extends Controller
             'count_occasions' => $count_occasions,
             'count_invitations' => $count_invitations
         );
-//        return $countObj;
+        //        return $countObj;
         $output = event
             ::filter($filters)
-            ->with(['user', 'country', 'region','media'])
-           // ->orderBy('special', 'Desc')
+            ->with(['user', 'country', 'region', 'media'])
+            // ->orderBy('special', 'Desc')
             ->orderBy('created_at', 'desc')
             ->paginate(10000);
         $output[] = $countObj;
@@ -200,14 +202,14 @@ class EventController extends Controller
     {
         $input = Request()->all();
 
-//        return         print_r($input['media']);
+        //        return         print_r($input['media']);
 
 
         $input['invitation_start_time'] = Carbon::now()->format('Y-m-d H:i:s');
         $rules = [
             'title' => 'required|String',
             'description' => 'required|String',
-            'special_image' => 'required|mimes:jpeg,jpg,png,gif|required',
+            'special_image' => 'required|mimes:jpeg,jpg,png,gif',
             'video' => 'mimes:mp4,mov,ogg,qt',
             'main_category_id' => 'required|Integer',
             // 'address' => 'required',
@@ -219,54 +221,54 @@ class EventController extends Controller
 
         $validator = Validator::make($input, $rules);
         if ($validator->fails()) {
-            return response()->json(['success' => false, 'error' => $validator->messages()], 401);
+            return response()->json(['success' => false, 'error' => $validator->errors()], 401);
         }
         //insert normal image
         $image = $input['special_image'];
         $image_name = 'media-' . rand(10, 100) . date('mdYhis') . '.' . pathinfo($image->getClientOriginalName(), PATHINFO_EXTENSION);
-        $image_path = public_path().'/storage/image/event/';
+        $image_path = public_path() . '/storage/image/event/';
 
 
         $image = Image::make($image);
-//            ->resize('1000', '800', function ($constraint) {
-////                $constraint->aspectRatio();
-//                $constraint->upsize();
-//            })
-//            ->encode('jpg', 50);
+        //            ->resize('1000', '800', function ($constraint) {
+        ////                $constraint->aspectRatio();
+        //                $constraint->upsize();
+        //            })
+        //            ->encode('jpg', 50);
         $image->orientate();
         $image->resize(1024, null, function ($constraint) {
             $constraint->upsize();
             $constraint->aspectRatio();
         });
-      //    Storage::disk('public')->put($image_path . $image_name, $image);
-     //     Storage::disk('public')->putFileAs($image_path, $image, $image_name);
-                     
-          $image->save($image_path . $image_name);
+        //    Storage::disk('public')->put($image_path . $image_name, $image);
+        //     Storage::disk('public')->putFileAs($image_path, $image, $image_name);
+
+        $image->save($image_path . $image_name);
 
         $input['special_image'] = '/storage/image/event/' . $image_name;
-        $event['created_at'] ='null';
+        $event['created_at'] = 'null';
         $event = event::create($input);
         //insert media
-//        print_r($input['media']);
-//        return;
+        //        print_r($input['media']);
+        //        return;
         $event->delete();
-            
+
         if (isset($input['media'])) {
             for ($i = 0; $i < count($input['media']); $i++) {
                 $media = $input['media'][$i];
                 $media_name = 'media-' . ($i + 30 * 35) . '-' . rand(100, 1000) . '-' . ($i * 30 + 95) . '.' . $media->getClientOriginalName();
                 $thump_name = 'thump-' . ($i + 30 * 35) . '-' . rand(100, 1000) . '-' . ($i * 30 + 95) . '.' . $media->getClientOriginalName();
-                $thump_path = public_path().'/storage/image/thump/';
-                $media_path = public_path().'/storage/image/event/';
+                $thump_path = public_path() . '/storage/image/thump/';
+                $media_path = public_path() . '/storage/image/event/';
 
                 $height = Image::make($media)->height();
                 $newWidth = ($height * 8) / 5;
                 $thump = Image::make($media);
-//                    ->resize('1000', '800', function ($constraint) {
-//                        $constraint->aspectRatio();
-//                        $constraint->upsize();
-//                    })
-//                    ->encode('jpg', 50);
+                //                    ->resize('1000', '800', function ($constraint) {
+                //                        $constraint->aspectRatio();
+                //                        $constraint->upsize();
+                //                    })
+                //                    ->encode('jpg', 50);
                 $thump->orientate();
                 $thump->resize(1024, null, function ($constraint) {
                     $constraint->upsize();
@@ -275,33 +277,30 @@ class EventController extends Controller
 
                 $photo = Image::make($media);
 
-//                    ->resize('1000', '800', function ($constraint) {
-//                        $constraint->aspectRatio();
-//                        $constraint->upsize();
-//                    })
-//                    ->encode('jpg', 50);
+                //                    ->resize('1000', '800', function ($constraint) {
+                //                        $constraint->aspectRatio();
+                //                        $constraint->upsize();
+                //                    })
+                //                    ->encode('jpg', 50);
 
                 $photo->orientate();
                 $photo->resize(1024, null, function ($constraint) {
                     $constraint->upsize();
                     $constraint->aspectRatio();
                 });
-            //     Storage::disk('public')->put($media_path . $media_name, $photo);
+                //     Storage::disk('public')->put($media_path . $media_name, $photo);
                 $thump->save($thump_path . $thump_name);
                 $photo->save($media_path . $media_name);
-          //      Storage::disk('public')->putFileAs($media_path, $media, $media_name);
+                //      Storage::disk('public')->putFileAs($media_path, $media, $media_name);
 
                 $input['image'] = '/storage/image/event/' . $media_name;
                 $input['thump'] = '/storage/image/thump/' . $thump_name;
                 $media = new media();
                 $media->create(['event_id' => $event->id, 'image' => $input['image'], 'thump' => $input['thump']]);
             }
-
-
         }
-//        return ['state' => 202];
-          return response()->json(['success' =>true, 'message' => 'تم الارسال بنجاح', 'state' => 202 ]);
-
+        //        return ['state' => 202];
+        return response()->json(['success' => true, 'message' => 'تم الارسال بنجاح', 'state' => 202]);
     }
 
     /**
@@ -313,10 +312,9 @@ class EventController extends Controller
     public function show($id)
     {
 
-//        $getViewerCount = event::find($id)->viewer;
-//        event::where('id',$id)->update(['viewer' => $getViewerCount + 1]);
-
-        $output = event::where('id', $id)->first();
+        //        $getViewerCount = event::find($id)->viewer;
+        //        event::where('id',$id)->update(['viewer' => $getViewerCount + 1]);
+        /* $output = event::with('banners')->where('id', $id)->first();
         $sort = 0;
         if ($output->ad_image != null) {
 
@@ -330,16 +328,44 @@ class EventController extends Controller
                 'thump' => $output->ad_image_thump
             );
             $event_image = media::where('event_id', $id)->get()->toArray();
+
             array_splice($event_image, $sort - 1, 0, $data); // splice in at position 3
-            $output = event::where('id', $id)->with(['user', 'country', 'region'])->first();
+            $output = event::where('id', $id)->with(['user', 'country', 'region', 'banners'])->first();
 
             $output->media = $event_image;
             return $output;
         } else {
 
-            return $output = event::where('id', $id)->with(['media', 'user', 'country', 'region'])->first();
-        }
+            return $output = event::where('id', $id)->with(['media', 'user', 'country', 'region', 'banners'])->first();
+        } */
+        try {
+            $event = event::with([
+                'media',
+                'user',
+                'country',
+                'region',
+                'banners'
+            ])->find($id);
 
+            if (!$event) {
+                throw new ModelNotFoundException();
+            }
+
+            $event->media_ads = $this->mergeMediaWithAds($event);
+            unset($event->media);
+            unset($event->banners);
+            return $event;
+        } catch (ModelNotFoundException $e) {
+            return response()->json([
+                'message' => 'عذرا, المحتوي المطلوب غير موجود',
+                'error_code' => 404
+            ], 404);
+        } catch (Exception $e) {
+            return response()->json([
+                'message' => 'عذرا, حدث خطا اثناء جلب البيانات',
+                'error_code' => 500,
+            ], 500);
+        }
     }
 
 
@@ -350,7 +376,7 @@ class EventController extends Controller
 
         $event_image = media::where('event_id', $event_id)
             ->paginate(5)
-//                ->get()
+            //                ->get()
             ->toArray();
 
         $special_image[] = array(
@@ -360,10 +386,10 @@ class EventController extends Controller
             'image' => $output->special_image,
             'thump' => $output->special_image
         );
-        if ($event_image['current_page'] == '1'):
+        if ($event_image['current_page'] == '1') :
             array_splice($event_image['data'], 0, 0, $special_image); // splice in at position 3
         endif;
-//         dd(array_splice($event_image['data'], 0,0 ,$special_image));
+        //         dd(array_splice($event_image['data'], 0,0 ,$special_image));
 
         if ($output->ad_image != null) {
 
@@ -380,33 +406,33 @@ class EventController extends Controller
             $newSort = $sort - 1; // 66 - 1 = 65
             // take 5
             $newSort = str_split($newSort);
-//            dd($newSort);
-//            return $newSort[0];
+            //            dd($newSort);
+            //            return $newSort[0];
 
-            if (count($newSort) > 1):
+            if (count($newSort) > 1) :
                 $newSort = $newSort[1] == 1 || $newSort[1] == 2 ? $newSort[1] : $newSort[1] - 1;
-            else:
+            else :
                 $newSort = $newSort[0] == 1 || $newSort[0] == 2 ? $newSort[0] : $newSort[0] - 1;
             endif;
-//            dd(str_split($event_image['to']));
+            //            dd(str_split($event_image['to']));
             $page = str_split($event_image['to']);
-//            $pageNum = count($page) == 2 ? $page[0] : $page[1];
-            if(count($page) == 2 && isset($page[1])){
-               $pageNum =  $page[1];
-            }else{
-               $pageNum = $page[0];
-             }
-//            return $event_image['current_page'] .'    '. $pageNum;
-            if ($event_image['current_page'] == $pageNum && $event_image['last_page'] > $event_image['current_page']):
-                if ($output->ad_image_sort >= $event_image['from'] && $event_image['to'] >= $output->ad_image_sort):
+            //            $pageNum = count($page) == 2 ? $page[0] : $page[1];
+            if (count($page) == 2 && isset($page[1])) {
+                $pageNum =  $page[1];
+            } else {
+                $pageNum = $page[0];
+            }
+            //            return $event_image['current_page'] .'    '. $pageNum;
+            if ($event_image['current_page'] == $pageNum && $event_image['last_page'] > $event_image['current_page']) :
+                if ($output->ad_image_sort >= $event_image['from'] && $event_image['to'] >= $output->ad_image_sort) :
                     array_splice($event_image['data'], $newSort, 0, $data); // splice in at position 3
                 endif;
 
             endif;
 
-//            $output->media = $event_image;
-//            return $output;
-//            $items = array_slice($event_image, request('pre_page',0), 10 );
+            //            $output->media = $event_image;
+            //            return $output;
+            //            $items = array_slice($event_image, request('pre_page',0), 10 );
 
             return $event_image;
         }
@@ -441,14 +467,14 @@ class EventController extends Controller
             'video' => 'mimes:mp4,mov,ogg,qt | max:20000',
             'main_category_id' => 'required|Integer',
             // 'address' => 'required',
-//             'phone' => 'required',
+            //             'phone' => 'required',
             'user_id' => 'required|In teger',
             'invitation_start_time' => 'date_format:Y-m-d H:i:s'
         ];
 
         $validator = Validator::make($input, $rules);
         if ($validator->fails()) {
-            return response()->json(['success' => false, 'error' => $validator->messages()], 401);
+            return response()->json(['success' => false, 'error' => $validator->errors()], 401);
         }
         //insert normal image
         if (isset($input['special_image'])) {
@@ -459,14 +485,13 @@ class EventController extends Controller
 
             $photo = Image::make($image)
                 ->fit(1600, 1400, function ($constraint) {
-//            $constraint->aspectRatio();
+                    //            $constraint->aspectRatio();
                 })->encode('jpg', 50);
             Storage::disk('public')->put($image_path . $image_name, $photo);
 
-//            Storage::disk('public')->putFileAs($image_path, $image, $image_name);
+            //            Storage::disk('public')->putFileAs($image_path, $image, $image_name);
 
             $input['special_image'] = '/storage/image/event/' . $image_name;
-
         }
         $event = event::where('id', $id)->first();
         Storage::delete($event['special_image']);
@@ -497,14 +522,13 @@ class EventController extends Controller
                     ->encode('jpg', 50);
                 Storage::disk('public')->put($media_path . $media_name, $photo);
                 $thump->save($thump_path . $thump_name);
-//                Storage::disk('public')->putFileAs($media_path, $media, $media_name);
+                //                Storage::disk('public')->putFileAs($media_path, $media, $media_name);
 
                 $input['image'] = '/storage/image/event/' . $media_name;
                 $input['thump'] = '/thump/' . $thump_name;
                 $media = new media();
                 $media->create(['event_id' => $event->id, 'image' => $input['image'], 'thump' => $input['thump']]);
             }
-
         }
         return ['state' => 202];
     }
@@ -521,5 +545,37 @@ class EventController extends Controller
         return ['state' => 202];
     }
 
+    /**
+     * Merge Event media with Event ads
+     * in the given ads positions
+     * @param event
+     * @return array
+     */
+    private function mergeMediaWithAds($event)
+    {
+        // add media_type property to event media
+        foreach($event->media as $item) {
+            $item->media_type = "media";
+        };
+        // add media_type property to ads
+        foreach($event->banners as $item) {
+            $item->media_type = "ad";
+        }
 
+        // convert media to array
+        $media = $event->media->toArray();
+        // convert media to associated array keyed with position
+        $banners = $event->banners->groupBy('position')->toArray();
+        /**
+         * loop through banners and add banner in
+         * media on the given position
+         */
+        foreach($banners as $key => $items) {
+            array_splice($media,$key-1,0,$items);
+
+        }
+
+        return $media;
+
+    }
 }
