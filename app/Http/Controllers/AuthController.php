@@ -226,7 +226,6 @@ class AuthController extends Controller
 
     public function login(Request $request)
     {
-
         $credentials = $request->only('phone', 'password');
 
         $rules = [
@@ -344,6 +343,11 @@ class AuthController extends Controller
 
     public function send_code_reset_password(Request $request)
     {
+        return response()->json([
+            'success' => true,
+            'message' => ['Password ready to reset']
+        ]);
+        /*
         $input = Request()->all();
         $rules = [
             'phone' => 'required|exists:users',
@@ -358,13 +362,42 @@ class AuthController extends Controller
         User::where('phone', $input['phone'])->update(['verification_code' => $verification_code]);
         $message = "    رمز التفعيل الخاص بك هو    $verification_code  ";
         $this->SendSMSWithVcode($request->phone, $message);
-        return response()->json(['success' => true, 'message' => ['send success']], 202);
+        return response()->json(['success' => true, 'message' => ['send success']], 202); */
     }
 
 
-    public function reset_password()
+    public function reset_password(Request $request)
     {
-        $input = Request()->all();
+
+        $request->validate([
+            'phone' => ['required', 'exists:users,phone'],
+            'password' => ['required','min:8', 'confirmed'],
+        ],[
+            'phone.required' => 'رقم التليفون مطلوب',
+            'phone.exists' => 'هذا المستخدم غير مسجل, يمكنك التسجيل من جديد',
+            'password.required' => 'كلمة السر مطلوبة',
+            'password.min' => 'لابد ان تكون كلمة السر ع الاقل 8 احرف',
+            'password.confirmed' => 'كلمتي السر غير متطابقتان',
+        ]);
+
+        $user = User::where('phone', $request->phone)->first();
+
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'رقم جوال خاطئ او المستخدم غير مسجل'
+            ], 404);
+        }
+
+        $user->update([
+            'password' => Hash::make($request->password)
+        ]);
+
+        return response()->json([
+            'message' => 'تم إعادة ضبط كلمة السر',
+        ]);
+
+        /* $input = Request()->all();
         $rules = [
             'phone' => 'required|exists:users',
             'verification_code' => 'required',
@@ -381,7 +414,7 @@ class AuthController extends Controller
             return ['state' => 202];
         } else {
             return response()->json(['success' => false, 'error' => array('user' => ['Verification code you entered not valid'])], 401);
-        }
+        } */
     }
 
     /**

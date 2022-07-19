@@ -35,7 +35,7 @@ class AdsController extends Controller
      */
     public function index(Request $request)
     {
-         
+
         $user = new User();
         //Get Count of Events Between User Last Seen & Events Created_At
         // if Send User in Headers
