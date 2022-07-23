@@ -51,6 +51,8 @@ return [
         'backup' => [
             'driver' => 'local',
             'root' => storage_path('app/public/backups'),
+            'visibility' => 'public',
+            'url' => env('APP_URL')
         ],
 
          'google' => [
