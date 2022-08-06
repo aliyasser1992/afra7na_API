@@ -352,6 +352,14 @@ class EventController extends Controller
             }
 
             $event->media_ads = $this->mergeMediaWithAds($event);
+            $event->media_ads = array_merge([
+               [ 'id' => rand(50000, 100000),
+                "event_id" => $id,
+                'ads_id' => null,
+                'image' => $event->special_image,
+                'thump' => $event->special_image,
+                'media_type' => "media",]
+            ], $event->media_ads);
             unset($event->media);
             unset($event->banners);
             return $event;
