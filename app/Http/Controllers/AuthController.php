@@ -389,9 +389,12 @@ class AuthController extends Controller
             ], 404);
         }
 
-        $user->update([
+        /* $user->update([
             'password' => Hash::make($request->password)
-        ]);
+        ]); */
+
+        $user->password = Hash::make($request->password);
+        $user->save();
 
         return response()->json([
             'message' => 'تم إعادة ضبط كلمة السر',
