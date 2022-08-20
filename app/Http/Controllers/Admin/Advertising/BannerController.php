@@ -82,7 +82,7 @@ class BannerController extends Controller
 
                 $path = $request->file('photo')->store('image/banners');
                 //$path = Storage::putFile('image', $request->file('photo'));
-                $banner->link = 'storage/'.$path;
+                $banner->link = '/storage/'.$path;
                 $banner->save();
             }
 
@@ -135,7 +135,7 @@ class BannerController extends Controller
 
                 $path = $request->file('photo')->store('image/banners');
                 //$path = Storage::putFile('image', $request->file('photo'));
-                $banner->link = 'storage/'.$path;
+                $banner->link = '/storage/'.$path;
                 $banner->save();
             }
 

@@ -135,7 +135,10 @@ class RegionController extends Controller
 
 //       return $final_arr;
 
-        $output = region::where('country_id', $input['country_id'])->get();
+        //$output = region::where('country_id', $input['country_id'])->get();
+        $output = region::query()->when($request->country_id, function ($query) use($request) {
+            return $query->where('country_id', $request->country_id);
+        })->get();
         $final_array = array();
 //        return $countObj;
         foreach ($output as $key => $data) {
