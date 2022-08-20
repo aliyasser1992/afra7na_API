@@ -51,6 +51,8 @@ Route::group([
 
 ], function () {
 
+    Route::post("delete-my-account", "UserController@destroy");
+
     Route::resource('main-category', 'mainCategoryController');
 
     Route::resource('event', 'EventController');
