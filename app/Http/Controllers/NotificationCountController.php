@@ -21,7 +21,14 @@ class NotificationCountController extends Controller
         }
 
         $counter = adsNotifications::where('country_id', $user->country_id)
+        ->when($user->notification, function ($query) use($user) {
+            $query->where('created_at', '>', $user->notification);
+        })
         ->count("*");
+
+        $user->update([
+            'notification' => date('Y-m-d H:i:s')
+        ]);
 
         return response()->json([
             'state' => 'Success',
