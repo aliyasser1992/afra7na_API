@@ -8,9 +8,9 @@ use App\Model\User;
 class NotificationCountController extends Controller
 {
     //
-    public function NotificationCount(Request $request)
+    public function NotificationCount()
     {
-        $user = User::find($request->user_id);
+        $user = User::find(request()->user_id);
 
         if (!$user) {
             return response()->json([
