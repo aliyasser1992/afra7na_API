@@ -20,7 +20,7 @@ class NotificationCountController extends Controller
             ]);
         }
 
-        $counter = adsNotifications::where('region_id', $user->region_id)
+        $counter = adsNotifications::where('country_id', $user->country_id)
         ->count("*");
 
         return response()->json([
