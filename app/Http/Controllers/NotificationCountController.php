@@ -10,7 +10,7 @@ class NotificationCountController extends Controller
     //
     public function NotificationCount()
     {
-        $user = User::find(request()->user_id);
+        $user = request()->user();
 
         if (!$user) {
             return response()->json([
@@ -26,7 +26,7 @@ class NotificationCountController extends Controller
         return response()->json([
             'state' => 'Success',
             'count' => $counter,
-            'user' => $user->name
+            'user' => $user
         ]);
 
 
