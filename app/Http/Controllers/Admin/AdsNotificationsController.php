@@ -105,10 +105,13 @@ class AdsNotificationsController extends Controller
         $optionBuilder->setTimeToLive(60 * 20);
         $notificationBuilder = new PayloadNotificationBuilder(trans('اشعار جديد'));
         $dataBuilder = new PayloadDataBuilder();
+        // $notificationBuilder
+        //     ->setBody($text)
+        //     ->setSound('default')
+        //     ->setBadge($notification_count);
         $notificationBuilder
             ->setBody($text)
-            ->setSound('default')
-            ->setBadge($notification_count);
+            ->setSound('default');
         $dataBuilder->addData(
             [
                 'title' => trans('notifications.title'),
