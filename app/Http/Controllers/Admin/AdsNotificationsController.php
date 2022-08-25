@@ -82,7 +82,7 @@ class AdsNotificationsController extends Controller
             $this->TopicNotification("all", $text, (string)$badge);
 
         } else {
-               
+
             $badge = $this->CountNotificationsByRegions(0);
             $this->TopicNotification('all', $text , $badge);
         }
@@ -105,13 +105,13 @@ class AdsNotificationsController extends Controller
         $optionBuilder->setTimeToLive(60 * 20);
         $notificationBuilder = new PayloadNotificationBuilder(trans('اشعار جديد'));
         $dataBuilder = new PayloadDataBuilder();
-        // $notificationBuilder
-        //     ->setBody($text)
-        //     ->setSound('default')
-        //     ->setBadge($notification_count);
-        $notificationBuilder
+         $notificationBuilder
+             ->setBody($text)
+             ->setSound('default')
+             ->setBadge($notification_count);
+        /* $notificationBuilder
             ->setBody($text)
-            ->setSound('default');
+            ->setSound('default'); */
         $dataBuilder->addData(
             [
                 'title' => trans('notifications.title'),
