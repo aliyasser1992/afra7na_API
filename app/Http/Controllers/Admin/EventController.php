@@ -87,7 +87,9 @@ class EventController extends Controller
      */
     public function show($id)
     {
-        //
+        $event = event::with(['media'])->findOrFail($id);
+
+        return response($event);
     }
 
     /**
